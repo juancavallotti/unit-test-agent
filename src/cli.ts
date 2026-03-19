@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import "dotenv/config";
 import { program } from "commander";
 import { runGraph } from "./agent/graph.js";

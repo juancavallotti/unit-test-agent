@@ -14,6 +14,9 @@
   "author": "Juan Alberto Lopez Cavallotti",
   "type": "module",
   "main": "dist/cli.js",
+  "bin": {
+    "unit-test-agent": "dist/cli.js"
+  },
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json && node ./scripts/copy-md.mjs",
     "start": "node --import ./scripts/register-md.mjs --import tsx src/cli.ts",

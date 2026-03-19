@@ -2,7 +2,87 @@
 
 CLI agent that generates Go unit tests and improves project coverage.
 
-## Run with Docker (cloud-friendly)
+## Agent Architecture
+
+The agent runs a graph-based loop that measures coverage, targets the highest-value files, plans tests, applies test changes, and re-measures until the target is reached.
+
+I chose this design to keep deterministic paths deterministic and reserve LLM calls for decisions that actually need reasoning:
+- Coverage measurement and file selection are deterministic.
+- LLM calls are focused on planning and code generation only.
+- Concurrency is controlled explicitly so planning and generation can scale without flooding model calls.
+- Termination is bounded by `GRAPH_RECURSION_LIMIT` (graph loop) and an internal max-step guard in code generation.
+
+```mermaid
+flowchart TD
+  cli[CLI run] --> graph[runGraph]
+  graph --> coverage[coverage]
+  coverage -->|"compilationErrors present"| codegen[codeGeneration]
+  coverage -->|"currentCoverage >= targetCoverage"| endNode[END]
+  coverage -->|"otherwise"| selectFiles[selectUncoveredFiles]
+  selectFiles --> planner[planner]
+  planner --> codegen
+  codegen --> coverage
+```
+
+### Node responsibilities
+
+- `coverage`: runs Go tests with coverage and determines next route.
+- `selectUncoveredFiles`: deterministically picks top uncovered files (bounded by `CONCURRENCY`).
+- `planner`: uses an LLM to propose test plans per selected file.
+- `codeGeneration`: uses tool-calling to create/patch tests, compile, and run tests.
+
+## Local Setup
+
+### 1) Install dependencies
+
+```bash
+npm install
+```
+
+### 2) Configure environment
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set at least:
+- `SOURCE_FOLDER`
+- `TARGET_COVERAGE`
+- `TARGET_MODEL` (`openai` or `ollama`)
+- `CONCURRENCY`
+- `GRAPH_RECURSION_LIMIT`
+
+Provider-specific variables:
+- OpenAI: `OPENAI_API_KEY` (required), `OPENAI_MODEL` (optional)
+- Ollama: `OLLAMA_MODEL` (optional)
+
+### 3) Build the project
+
+```bash
+npm run build
+```
+
+### 4) Link CLI globally for local use
+
+```bash
+npm link
+```
+
+### 5) Run locally
+
+Using linked CLI:
+
+```bash
+unit-test-agent run --src /absolute/path/to/go-repo --coverage 80 --model openai
+```
+
+Or using npm script:
+
+```bash
+npm run run -- --src /absolute/path/to/go-repo --coverage 80 --model openai
+```
+
+## Docker Guide (Practical Commands)
 
 ### Build image
 
@@ -10,9 +90,7 @@ CLI agent that generates Go unit tests and improves project coverage.
 docker build -t unit-test-agent .
 ```
 
-### Run against a mounted repository
-
-Mount any Go repository under `/workspace` and point `--src` to that path:
+### Run with explicit API key
 
 ```bash
 docker run --rm \
@@ -24,14 +102,7 @@ docker run --rm \
   --model openai
 ```
 
-### Inject environment variables
-
-You can inject env at runtime using either:
-
-- `-e KEY=value` for individual values
-- `--env-file /path/to/.env` for many values
-
-Example with env file:
+### Run with env file
 
 ```bash
 docker run --rm \
@@ -43,15 +114,9 @@ docker run --rm \
   --model openai
 ```
 
-## Relevant environment variables
+### Helpful Docker notes
 
-- `SOURCE_FOLDER`: default source path if `--src` is omitted
-- `TARGET_COVERAGE`: default target coverage if `--coverage` is omitted
-- `TARGET_MODEL`: `openai` or `ollama` if `--model` is omitted
-- `CONCURRENCY`: max concurrent plans/tests (default `2`)
-- `GRAPH_RECURSION_LIMIT`: graph recursion limit (default `50`)
-- `OPENAI_API_KEY`: required when using OpenAI provider
-- `OPENAI_MODEL`: optional OpenAI model override
-- `OLLAMA_MODEL`: optional Ollama model override
-
-If using Ollama from inside a container, ensure the Ollama endpoint is reachable from the runtime environment (for example via host networking or a reachable service URL).
+- Mount the target Go repo under `/workspace` and pass that mounted path to `--src`.
+- The image already includes Go, Git, CA certificates, and the built CLI.
+- Container entrypoint is the CLI, with default command `run`.
+- If using Ollama from Docker, ensure the Ollama endpoint is reachable from the container runtime.
