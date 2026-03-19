@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { program } from "commander";
 
 program
