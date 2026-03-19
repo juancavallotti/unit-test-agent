@@ -8,6 +8,7 @@ import { createCompileGoTool } from "../tools/compileGo.js";
 import { createCreateFileTool } from "../tools/createFile.js";
 import { createPatchFileTool } from "../tools/patchFile.js";
 import { createReadFileTool } from "../tools/readFile.js";
+import { createRunTestTool } from "../tools/runTest.js";
 
 const MAX_AGENT_STEPS = 25;
 
@@ -17,6 +18,7 @@ function getTools(sourceFolder: string): StructuredToolInterface[] {
         createCreateFileTool(sourceFolder),
         createPatchFileTool(sourceFolder),
         createCompileGoTool(sourceFolder),
+        createRunTestTool(sourceFolder),
     ];
 }
 

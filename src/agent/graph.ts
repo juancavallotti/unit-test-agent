@@ -48,6 +48,7 @@ function configureGraph(modelProvider: "ollama" | "openai") {
         .addNode("planner", wrapWithLog("planner", plannerNode))
         .addNode("codeGeneration", wrapWithLog("codeGeneration", codeGenerationNode))
         .addEdge(START, "coverage")
+        .addConditionalEdges("coverage", (state) => state.currentCoverage >= state.targetCoverage ? END : "selectUncoveredFiles")
         .addEdge("coverage", "selectUncoveredFiles")
         .addEdge("selectUncoveredFiles", "planner")
         .addEdge("planner", "codeGeneration")
