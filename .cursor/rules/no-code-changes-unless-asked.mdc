@@ -1,0 +1,12 @@
+---
+description: Do not change code unless the user explicitly asks for code changes
+alwaysApply: true
+---
+
+# Code changes only when requested
+
+Do **not** make code changes (edits, new files, refactors, or "fixes") unless the user **explicitly asks** for code changes.
+
+- If the user asks for an explanation, suggestion, review, or "how do I...", respond with guidance only. Do not edit the codebase.
+- If the user asks for a specific non-code deliverable (e.g. "add a run script" meaning only a package.json script), make only that change. Do not add or change other code (e.g. env loading, validation, error handling) unless they ask for it.
+- Only edit files when the user clearly requests a code change (e.g. "add X", "fix Y", "implement Z", "change this to...").

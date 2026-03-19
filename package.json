@@ -17,6 +17,7 @@
   "scripts": {
     "build": "vite build",
     "start": "tsx src/cli.ts",
+    "run": "tsx src/cli.ts run",
     "test": "vitest",
     "test:run": "vitest run"
   },
