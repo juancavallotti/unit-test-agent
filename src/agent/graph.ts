@@ -13,6 +13,7 @@ export async function runGraph(
         targetCoverage,
         messages: [],
         currentCoverage: 0,
+        selectedFiles: [],
     } as typeof State.State;
     const result = await graph.invoke(state);
     return result;

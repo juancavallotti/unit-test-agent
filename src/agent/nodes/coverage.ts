@@ -3,16 +3,10 @@
  */
 
 import { State } from "../state.js";
-
-import { exec } from "child_process";
-import { promisify } from "node:util";
-
-const execPromise = promisify(exec);
+import { runExec } from "../../utils/exec.js";
 
 export async function coverageNode(state: typeof State.State): Promise<typeof State.Update> {
-    // Run the coverage command in the source folder.
-    // promisify(exec) resolves with { stdout, stderr } (Node's custom promisify for exec)
-    const { stdout, stderr } = await execPromise(
+    const { stdout, stderr } = await runExec(
         "go test -coverprofile=coverage.out",
         { cwd: state.sourceFolder }
     );

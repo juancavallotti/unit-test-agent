@@ -33,6 +33,7 @@ describe("coverageNode", () => {
     messages: [],
     currentCoverage: 0,
     targetCoverage: 80,
+    selectedFiles: [],
   } as typeof State.State;
 
   beforeEach(() => {

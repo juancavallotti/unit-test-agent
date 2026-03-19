@@ -28,14 +28,9 @@ program
       console.error("TARGET_COVERAGE must be a number between 0 and 100");
       process.exit(1);
     }
-    const model = (targetModel ?? "ollama").toLowerCase();
-    if (model !== "ollama" && model !== "openai") {
-      console.error("TARGET_MODEL must be 'ollama' or 'openai' in .env (default: ollama)");
-      process.exit(1);
-    }
 
     try {
-      const result = await runGraph(sourceFolder, coverageNum, model as "ollama" | "openai");
+      const result = await runGraph(sourceFolder, coverageNum);
       console.log(result);
     } catch (err) {
       const e = err as Error & { stdout?: string; stderr?: string };
