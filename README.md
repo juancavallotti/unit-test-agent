@@ -26,10 +26,21 @@ flowchart TD
 
 ### Node responsibilities
 
-- `coverage`: runs Go tests with coverage and determines next route.
-- `selectUncoveredFiles`: deterministically picks top uncovered files (bounded by `CONCURRENCY`).
-- `planner`: uses an LLM to propose test plans per selected file.
-- `codeGeneration`: uses tool-calling to create/patch tests, compile, and run tests.
+- `coverage`: runs `go test` with coverage, updates current coverage, and decides whether to stop, continue, or route to recovery when compilation/test errors exist.
+- `selectUncoveredFiles`: parses coverage output and deterministically chooses the highest-impact uncovered files (bounded by `CONCURRENCY`) to avoid unnecessary LLM work.
+- `planner`: generates high-level test plans for selected files (what cases to add, what behavior to validate) without directly editing code.
+- `codeGeneration`: executes the plans by creating/updating test files via tools, then compiles and runs tests in a bounded loop before handing control back to `coverage`.
+
+## Hardening Notes (Production-minded)
+
+- For real-world usage, prefer a reasoning-capable model for `planner` and a lower-latency non-reasoning model for `codeGeneration` to balance quality and cost.
+- Keep deterministic stages (`coverage`, `selectUncoveredFiles`) free of LLM dependencies so retries and failure analysis stay predictable.
+- If adding Ollama support in Docker, run Ollama as a separate service/container and call it in API mode from the agent container.
+- Alternatively, use a managed/cloud Ollama-compatible endpoint so the agent container only needs outbound API access.
+- Enable LangSmith tracing in development/staging to inspect node-level execution, prompt/tool behavior, and failure paths during debugging.
+  - `LANGSMITH_API_KEY`
+  - `LANGSMITH_TRACING=true`
+  - `LANGSMITH_PROJECT=<project-name>`
 
 ## Local Setup
 
@@ -116,7 +127,8 @@ docker run --rm \
 
 ### Helpful Docker notes
 
+- Docker runtime support is intended for `--model openai`.
+- Treat Ollama primarily as a local sanity/workflow testing option rather than the primary Docker path.
 - Mount the target Go repo under `/workspace` and pass that mounted path to `--src`.
 - The image already includes Go, Git, CA certificates, and the built CLI.
 - Container entrypoint is the CLI, with default command `run`.
-- If using Ollama from Docker, ensure the Ollama endpoint is reachable from the container runtime.
