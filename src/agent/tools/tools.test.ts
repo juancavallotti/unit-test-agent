@@ -40,11 +40,18 @@ describe("file tools", () => {
         await rm(dir, { recursive: true, force: true });
     });
 
-    it("read_file returns contents", async () => {
+    it("read_file returns contents in line-numbered format", async () => {
         await writeFile(join(dir, "a.txt"), "hello", "utf-8");
         const readTool = createReadFileTool(dir);
         const out = await readTool.invoke({ path: "a.txt" });
-        expect(out).toBe("hello");
+        expect(out).toBe("l: 1\nhello");
+    });
+
+    it("read_file returns multi-line content in line-numbered format", async () => {
+        await writeFile(join(dir, "multi.txt"), "a\nb\nc", "utf-8");
+        const readTool = createReadFileTool(dir);
+        const out = await readTool.invoke({ path: "multi.txt" });
+        expect(out).toBe("l: 1\na\nl: 2\nb\nl: 3\nc");
     });
 
     it("create_file writes nested path", async () => {
@@ -54,28 +61,44 @@ describe("file tools", () => {
         expect(await readFile(join(dir, "sub/b.txt"), "utf-8")).toBe("x");
     });
 
-    it("patch_file replaces all occurrences", async () => {
+    it("patch_file replaces line range with new lines", async () => {
         await writeFile(join(dir, "c.txt"), "a a a", "utf-8");
         const patchTool = createPatchFileTool(dir);
         const out = await patchTool.invoke({
             path: "c.txt",
-            old_string: "a",
-            new_string: "b",
+            start_line: 1,
+            end_line: 1,
+            new_lines: ["b b b"],
         });
         expect(out).toContain("Patched");
+        expect(out).toContain("l: 1\nb b b");
         expect(await readFile(join(dir, "c.txt"), "utf-8")).toBe("b b b");
     });
 
-    it("patch_file does not modify when old_string missing", async () => {
+    it("patch_file does not modify when line range is invalid", async () => {
         await writeFile(join(dir, "d.txt"), "same", "utf-8");
         const patchTool = createPatchFileTool(dir);
         const out = await patchTool.invoke({
             path: "d.txt",
-            old_string: "nope",
-            new_string: "x",
+            start_line: 2,
+            end_line: 3,
+            new_lines: ["x"],
         });
-        expect(out).toContain("not found");
+        expect(out).toContain("out of bounds");
         expect(await readFile(join(dir, "d.txt"), "utf-8")).toBe("same");
+    });
+
+    it("patch_file replaces multi-line range", async () => {
+        await writeFile(join(dir, "e.txt"), "one\ntwo\nthree", "utf-8");
+        const patchTool = createPatchFileTool(dir);
+        const out = await patchTool.invoke({
+            path: "e.txt",
+            start_line: 2,
+            end_line: 2,
+            new_lines: ["2"],
+        });
+        expect(out).toContain("Patched");
+        expect(await readFile(join(dir, "e.txt"), "utf-8")).toBe("one\n2\nthree");
     });
 });
 
