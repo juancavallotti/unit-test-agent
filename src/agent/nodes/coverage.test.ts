@@ -32,6 +32,7 @@ describe("coverageNode", () => {
     sourceFolder: "/tmp/go-project",
     messages: [],
     currentCoverage: 0,
+    targetCoverage: 80,
   } as typeof State.State;
 
   beforeEach(() => {
