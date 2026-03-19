@@ -13,6 +13,8 @@ const cache = new Map<"ollama" | "openai", BaseChatModel>();
  */
 export function getChat(provider: "ollama" | "openai"): BaseChatModel {
     let model = cache.get(provider);
+    const modelName = provider === "openai" ? OPENAI_MODEL : OLLAMA_MODEL;
+    console.log("[llm] getting chat model for provider:", provider, "model:", modelName);
     if (!model) {
         if (provider === "openai") {
             model = new ChatOpenAI({ model: OPENAI_MODEL });

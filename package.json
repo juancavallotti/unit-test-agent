@@ -15,7 +15,7 @@
   "type": "module",
   "main": "dist/cli.js",
   "scripts": {
-    "build": "vite build",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && node ./scripts/copy-md.mjs",
     "start": "node --import ./scripts/register-md.mjs --import tsx src/cli.ts",
     "run": "node --import ./scripts/register-md.mjs --import tsx src/cli.ts run",
     "test": "vitest",

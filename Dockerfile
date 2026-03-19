@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY tsconfig.json vite.config.ts ./
+COPY tsconfig.json tsconfig.build.json env.d.ts ./
 COPY src ./src
 COPY scripts ./scripts
 
@@ -21,9 +21,10 @@ WORKDIR /app
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/scripts ./scripts
 
 # Mounted target repositories should be attached under /workspace.
 WORKDIR /workspace
 
-ENTRYPOINT ["node", "/app/dist/cli.js"]
+ENTRYPOINT ["node", "--import", "/app/scripts/register-md.mjs", "/app/dist/cli.js"]
 CMD ["run"]
