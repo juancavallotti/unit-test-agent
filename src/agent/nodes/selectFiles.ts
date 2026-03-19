@@ -19,9 +19,23 @@ export type CoverageFile = {
 /** The regex matches the filename, the start and end lines of the coverage, the number of statements, and the number of uncovered statements. */
 const COVERAGE_LINE_RE = /^(.+?):[\d.]+,[\d.]+ (\d+) (\d+)$/;
 
+/** Match `module <path>` in go.mod. */
+const GO_MOD_MODULE_RE = /^module\s+(.+)\s*$/m;
+
 /** The number of files to select. */
 //TODO: make this configurable.
-const TOP_N = 10;
+const TOP_N = 1; //one file for now so we can test.
+
+async function getGoModulePath(sourceFolder: string): Promise<string | null> {
+    const goModPath = join(sourceFolder, "go.mod");
+    try {
+        const content = await readFile(goModPath, "utf-8");
+        const m = content.match(GO_MOD_MODULE_RE);
+        return m ? m[1]!.trim() : null;
+    } catch {
+        return null;
+    }
+}
 
 export async function selectFilesNode(state: typeof State.State): Promise<typeof State.Update> {
     
@@ -45,8 +59,8 @@ export async function selectFilesNode(state: typeof State.State): Promise<typeof
         throw new Error(`Could not read coverage file: ${coveragePath}`);
     }
 
-    //parse the coverage file.  
-    const files = parseCoverageOut(raw);
+    const modulePath = await getGoModulePath(state.sourceFolder);
+    const files = parseCoverageOut(raw, modulePath);
 
     //sort the files by uncovered lines then coverage.
     const sorted = sortByUncoveredThenCoverage(files);
@@ -58,7 +72,7 @@ export async function selectFilesNode(state: typeof State.State): Promise<typeof
     return { selectedFiles };
 }
 
-function parseCoverageOut(content: string): CoverageFile[] {
+function parseCoverageOut(content: string, modulePath: string | null): CoverageFile[] {
     
     //split the coverage file into lines.
     const lines = content.trim().split("\n");
@@ -87,8 +101,15 @@ function parseCoverageOut(content: string): CoverageFile[] {
     }
 
     const result: CoverageFile[] = [];
-    for (const [filename, { total, uncovered }] of byFile) {
+    const prefix = modulePath ? `${modulePath}/` : "";
+    for (const [filepath, { total, uncovered }] of byFile) {
         const coverage = total > 0 ? ((total - uncovered) / total) * 100 : 0;
+        const filename =
+            prefix && filepath.startsWith(prefix)
+                ? filepath.slice(prefix.length)
+                : filepath.includes("/")
+                  ? filepath.slice(filepath.lastIndexOf("/") + 1)
+                  : filepath;
         result.push({ filename, uncoveredLines: uncovered, coverage });
     }
     return result;
