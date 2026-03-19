@@ -4,7 +4,7 @@
  * Used by read_file and patch_file so both return content in the same format (e.g. after
  * patching, the agent sees the new line numbers and can patch again or reason about the file).
  */
-export function formatContentWithLineNumbers(content: string): string {
-    const lines = content.split("\n");
+export function formatContentWithLineNumbers(content: string | string[]): string {
+    const lines = typeof content === "string" ? content.split("\n") : content;
     return lines.map((line, i) => `${String(i).padStart(4, "0")} | ${line}`).join("\n");
 }

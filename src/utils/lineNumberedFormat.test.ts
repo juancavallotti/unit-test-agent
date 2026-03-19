@@ -27,4 +27,10 @@ describe("formatContentWithLineNumbers", () => {
         expect(out).toContain("0000 | x");
         expect(out).toContain("0001 | y");
     });
+
+    it("formats array input without splitting", () => {
+        expect(formatContentWithLineNumbers(["alpha", "beta"])).toBe(
+            "0000 | alpha\n0001 | beta"
+        );
+    });
 });

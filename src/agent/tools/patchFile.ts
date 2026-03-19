@@ -43,8 +43,8 @@ export function createPatchFileTool(sourceFolder: string): DynamicStructuredTool
                 }
                 const before = lines.slice(0, startLine - 1);
                 const after = lines.slice(endLine);
-                const result = [...before, ...newLines, ...after].join("\n");
-                await writeFile(resolved.fullPath, result, "utf-8");
+                const result = [...before, ...newLines, ...after];
+                await writeFile(resolved.fullPath, result.join("\n"), "utf-8");
                 return `Patched file: ${filePath}\n\nNew file contents:\n\n${formatContentWithLineNumbers(result)}`;
             } catch (e) {
                 const msg = e instanceof Error ? e.message : String(e);
