@@ -41,6 +41,7 @@ flowchart TD
   - `LANGSMITH_API_KEY`
   - `LANGSMITH_TRACING=true`
   - `LANGSMITH_PROJECT=<project-name>`
+- Further hardening: parse `coverage.out` down to function-level spans and pass the exact under-tested functions/signatures to the LLM, so generation is guided by precise targets instead of relying on the model to infer what to test from file-level context alone.
 
 ## Local Setup
 
