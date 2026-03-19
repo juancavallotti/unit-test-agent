@@ -22,7 +22,8 @@
     "start": "node --import ./scripts/register-md.mjs --import tsx src/cli.ts",
     "run": "node --import ./scripts/register-md.mjs --import tsx src/cli.ts run",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@langchain/core": "^1.1.34",
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "vite": "^6.0.0",
