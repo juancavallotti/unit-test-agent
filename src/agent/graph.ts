@@ -33,6 +33,7 @@ export async function runGraph(
         selectedFiles: [],
         plannerResults: [],
         codeGenerationResults: [],
+        compilationErrors: undefined,
     } as typeof State.State;
     console.log(`[agent] Starting graph (sourceFolder=${sourceFolder}, targetCoverage=${targetCoverage})`);
     const result = await graph.invoke(state);
@@ -48,8 +49,11 @@ function configureGraph(modelProvider: "ollama" | "openai") {
         .addNode("planner", wrapWithLog("planner", plannerNode))
         .addNode("codeGeneration", wrapWithLog("codeGeneration", codeGenerationNode))
         .addEdge(START, "coverage")
-        .addConditionalEdges("coverage", (state) => state.currentCoverage >= state.targetCoverage ? END : "selectUncoveredFiles")
-        .addEdge("coverage", "selectUncoveredFiles")
+        .addConditionalEdges("coverage", (state) => {
+            if (state.compilationErrors) return "codeGeneration";
+            if (state.currentCoverage >= state.targetCoverage) return END;
+            return "selectUncoveredFiles";
+        })
         .addEdge("selectUncoveredFiles", "planner")
         .addEdge("planner", "codeGeneration")
         .addEdge("codeGeneration", "coverage")

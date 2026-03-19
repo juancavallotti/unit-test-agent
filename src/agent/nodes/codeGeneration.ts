@@ -54,7 +54,17 @@ function extractFinalMessage(messages: BaseMessage[]): string {
 export async function codeGenerationNode(
     state: typeof State.State
 ): Promise<typeof State.Update> {
-    if (state.plannerResults.length === 0) {
+    const tasks =
+        state.compilationErrors && state.plannerResults.length === 0
+            ? [
+                  {
+                      filename: "(fix compilation errors)",
+                      plan: `Fix the compilation errors in the test code.\n\nCompilation/test errors:\n${state.compilationErrors}`,
+                  },
+              ]
+            : state.plannerResults;
+
+    if (tasks.length === 0) {
         return { codeGenerationResults: [] };
     }
 
@@ -75,7 +85,7 @@ export async function codeGenerationNode(
     const systemPrompt = prompt;
 
     const results = await Promise.all(
-        state.plannerResults.map(async (item) => {
+        tasks.map(async (item) => {
             const { filename, plan } = item;
             try {
                 const userContent = `Target file: ${filename}\n\nPlan:\n${plan}\n\nImplement the tests according to the plan. Use the tools to read, create, or patch files and to compile.`;

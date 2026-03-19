@@ -2,7 +2,7 @@ import type { BaseChatModel } from "@langchain/core/language_models/chat_models"
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatOllama } from "@langchain/ollama";
 
-const OPENAI_MODEL = "gpt-4.1-mini";
+const OPENAI_MODEL = "gpt-5.4-mini";
 const OLLAMA_MODEL = "qwen2.5-coder:14b";
 
 const cache = new Map<"ollama" | "openai", BaseChatModel>();

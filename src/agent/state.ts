@@ -30,4 +30,6 @@ export const State = new StateSchema({
     selectedFiles: z.array(SelectedFileSchema).default(() => []),
     plannerResults: z.array(PlannerResultSchema).default(() => []),
     codeGenerationResults: z.array(CodeGenerationResultSchema).default(() => []),
+    /** When set, coverage failed (e.g. compilation errors); graph routes to codeGeneration to patch tests. */
+    compilationErrors: z.string().optional(),
 })

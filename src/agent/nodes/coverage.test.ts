@@ -37,6 +37,7 @@ describe("coverageNode", () => {
     selectedFiles: [],
     plannerResults: [],
     codeGenerationResults: [],
+    compilationErrors: undefined,
   } as typeof State.State;
 
   beforeEach(() => {
@@ -56,7 +57,7 @@ describe("coverageNode", () => {
       { cwd: "/tmp/go-project" },
       expect.any(Function)
     );
-    expect(update).toEqual({ currentCoverage: 42.5 });
+    expect(update).toMatchObject({ currentCoverage: 42.5 });
   });
 
   it("returns 0 when go output has 0.0% of statements", async () => {
@@ -67,16 +68,27 @@ describe("coverageNode", () => {
 
     const update = await coverageNode(baseState);
 
-    expect(update).toEqual({ currentCoverage: 0 });
+    expect(update).toMatchObject({ currentCoverage: 0 });
   });
 
-  it("throws when exec fails", async () => {
+  it("saves compilation errors to state when exec fails and routes to code generation", async () => {
     execMock.mockImplementation((_cmd: string, _opts: unknown, cb: (err: Error, stdout: string, stderr: string) => void) => {
       cb(new Error("go: not found"), "", "");
       return {} as ChildProcess;
     });
 
-    await expect(coverageNode(baseState)).rejects.toThrow("go: not found");
+    const update = await coverageNode(baseState);
+    expect(update).toMatchObject({ compilationErrors: "go: not found" });
+  });
+
+  it("saves stderr to compilationErrors when go test writes to stderr", async () => {
+    execMock.mockImplementation((_cmd: string, _opts: unknown, cb: (err: null, stdout: string, stderr: string) => void) => {
+      cb(null, "", "package foo: undefined: SomeCompilationError");
+      return {} as ChildProcess;
+    });
+
+    const update = await coverageNode(baseState);
+    expect(update).toMatchObject({ compilationErrors: "package foo: undefined: SomeCompilationError" });
   });
 
   it("throws when coverage output cannot be parsed", async () => {

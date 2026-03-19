@@ -6,17 +6,39 @@ import { State } from "../state.js";
 import { runExec } from "../../utils/exec.js";
 
 export async function coverageNode(state: typeof State.State): Promise<typeof State.Update> {
-    const { stdout, stderr } = await runExec(
-        "go test -coverprofile=coverage.out",
-        { cwd: state.sourceFolder }
-    );
+    try {
+        const { stdout, stderr } = await runExec(
+            "go test -coverprofile=coverage.out",
+            { cwd: state.sourceFolder }
+        );
 
-    if (stderr) {
-        throw new Error(`Coverage command failed: ${stderr}`);
+        if (stderr) {
+            console.log("[coverage] test/compile failed, saving errors and routing to code generation");
+            return { compilationErrors: stderr };
+        }
+        const coverage = parseCoverage(stdout ?? "");
+        console.log("[coverage] current coverage:", `${coverage}%`);
+        return { currentCoverage: coverage, compilationErrors: undefined };
+    } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg === "Coverage not found") throw err;
+        
+
+        if (typeof err !== "object" || err === null) {
+            return { compilationErrors: msg };
+        }
+
+        const {stderr, stdout} = err as {stderr?: string, stdout?: string};
+
+        if (typeof stderr === "string" && stderr.length > 0) {
+            return { compilationErrors: stderr };
+        } else if (typeof stdout === "string" && stdout.length > 0) {
+            return { compilationErrors: stdout };
+        } else {
+            return { compilationErrors: msg };
+        }
+        throw err;
     }
-    const coverage = parseCoverage(stdout ?? "");
-    console.log("[coverage] current coverage:", `${coverage}%`);
-    return { currentCoverage: coverage };
 }
 
 function parseCoverage(coverage: string): number {
