@@ -1,5 +1,6 @@
 import { StateGraph, START, END } from "@langchain/langgraph";
 import { State } from "./state.js";
+import { codeGenerationNode } from "./nodes/codeGeneration.js";
 import { coverageNode } from "./nodes/coverage.js";
 import { plannerNode } from "./nodes/planner.js";
 import { selectFilesNode } from "./nodes/selectFiles.js";
@@ -31,6 +32,7 @@ export async function runGraph(
         currentCoverage: 0,
         selectedFiles: [],
         plannerResults: [],
+        codeGenerationResults: [],
     } as typeof State.State;
     console.log(`[agent] Starting graph (sourceFolder=${sourceFolder}, targetCoverage=${targetCoverage})`);
     const result = await graph.invoke(state);
@@ -44,9 +46,11 @@ function configureGraph(modelProvider: "ollama" | "openai") {
         .addNode("coverage", wrapWithLog("coverage", coverageNode))
         .addNode("selectUncoveredFiles", wrapWithLog("selectUncoveredFiles", selectFilesNode))
         .addNode("planner", wrapWithLog("planner", plannerNode))
+        .addNode("codeGeneration", wrapWithLog("codeGeneration", codeGenerationNode))
         .addEdge(START, "coverage")
         .addEdge("coverage", "selectUncoveredFiles")
         .addEdge("selectUncoveredFiles", "planner")
-        .addEdge("planner", END)
+        .addEdge("planner", "codeGeneration")
+        .addEdge("codeGeneration", END)
         .compile();
 }

@@ -12,6 +12,12 @@ const PlannerResultSchema = z.object({
     plan: z.string(),
 });
 
+const CodeGenerationResultSchema = z.object({
+    filename: z.string(),
+    success: z.boolean(),
+    message: z.string().optional(),
+});
+
 /**
  * The state of the agent.
  */
@@ -23,4 +29,5 @@ export const State = new StateSchema({
     targetModel: z.enum(["ollama", "openai"]).default("openai"),
     selectedFiles: z.array(SelectedFileSchema).default(() => []),
     plannerResults: z.array(PlannerResultSchema).default(() => []),
+    codeGenerationResults: z.array(CodeGenerationResultSchema).default(() => []),
 })
