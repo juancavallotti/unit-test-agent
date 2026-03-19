@@ -1,4 +1,4 @@
-import type { State } from "./agent/state.js";
+import type { State } from "./agent/index.js";
 
 /**
  * Print a human-readable report from the final graph state to stdout.

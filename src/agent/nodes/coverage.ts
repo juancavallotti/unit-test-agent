@@ -3,7 +3,7 @@
  */
 
 import { State } from "../state.js";
-import { runExec } from "../../utils/exec.js";
+import { runExec } from "../../utils/index.js";
 
 const NO_TEST_FILES_MESSAGE =
     "No test files found. Create an initial _test.go file for this module and add a basic passing test.";

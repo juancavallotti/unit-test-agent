@@ -1,7 +1,7 @@
 import { dirname } from "node:path";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import * as z from "zod";
-import { runExec } from "../../utils/exec.js";
+import { runExec } from "../../utils/index.js";
 import { resolveUnderSource } from "./resolveUnderSource.js";
 
 const CompileGoSchema = z.object({

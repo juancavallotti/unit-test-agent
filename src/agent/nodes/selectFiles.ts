@@ -6,7 +6,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { State } from "../state.js";
-import { runExec } from "../../utils/exec.js";
+import { runExec } from "../../utils/index.js";
 
 /** Per-file coverage entry for sorting and state. */
 export type CoverageFile = {

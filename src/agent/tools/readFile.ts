@@ -1,7 +1,7 @@
 import { readFile as fsReadFile } from "node:fs/promises";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import * as z from "zod";
-import { formatContentWithLineNumbers } from "../../utils/lineNumberedFormat.js";
+import { formatContentWithLineNumbers } from "../../utils/index.js";
 import { resolveUnderSource } from "./resolveUnderSource.js";
 
 const ReadFileSchema = z.object({

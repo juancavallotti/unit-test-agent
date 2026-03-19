@@ -5,12 +5,14 @@ import { getChat } from "../llm.js";
 import prompt from "../prompts/codeGeneration.md";
 import skill from "../skills/idiomatic-go.md"
 import { State } from "../state.js";
-import { createCompileGoTool } from "../tools/compileGo.js";
-import { createCreateFileTool } from "../tools/createFile.js";
-import { createPatchFileTool } from "../tools/patchFile.js";
-import { createReadFileTool } from "../tools/readFile.js";
-import { createRunTestTool } from "../tools/runTest.js";
-import { runWithConcurrency } from "../../utils/runWithConcurrency.js";
+import {
+    createCompileGoTool,
+    createCreateFileTool,
+    createPatchFileTool,
+    createReadFileTool,
+    createRunTestTool,
+} from "../tools/index.js";
+import { runWithConcurrency } from "../../utils/index.js";
 
 const MAX_AGENT_STEPS = 25;
 

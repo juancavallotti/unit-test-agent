@@ -1,9 +1,11 @@
 import { StateGraph, START, END } from "@langchain/langgraph";
 import { State } from "./state.js";
-import { codeGenerationNode } from "./nodes/codeGeneration.js";
-import { coverageNode } from "./nodes/coverage.js";
-import { plannerNode } from "./nodes/planner.js";
-import { selectFilesNode } from "./nodes/selectFiles.js";
+import {
+    codeGenerationNode,
+    coverageNode,
+    plannerNode,
+    selectFilesNode,
+} from "./nodes/index.js";
 
 type NodeFn = (state: typeof State.State) => Promise<typeof State.Update>;
 
@@ -31,7 +33,6 @@ export async function runGraph(
         targetCoverage,
         targetModel,
         concurrency,
-        messages: [],
         currentCoverage: 0,
         selectedFiles: [],
         plannerResults: [],
