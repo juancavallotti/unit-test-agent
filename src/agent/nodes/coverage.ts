@@ -12,6 +12,11 @@ export async function coverageNode(state: typeof State.State): Promise<typeof St
             { cwd: state.sourceFolder }
         );
 
+        if (hasNoTestFiles(stdout, stderr)) {
+            console.log("[coverage] no test files found, defaulting coverage to 0%");
+            return { currentCoverage: 0, compilationErrors: undefined };
+        }
+
         if (stderr) {
             console.log("[coverage] test/compile failed, saving errors and routing to code generation");
             return { compilationErrors: stderr };
@@ -22,13 +27,17 @@ export async function coverageNode(state: typeof State.State): Promise<typeof St
     } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         if (msg === "Coverage not found") throw err;
-        
 
         if (typeof err !== "object" || err === null) {
             return { compilationErrors: msg };
         }
 
         const {stderr, stdout} = err as {stderr?: string, stdout?: string};
+
+        if (hasNoTestFiles(stdout, stderr)) {
+            console.log("[coverage] no test files found, defaulting coverage to 0%");
+            return { currentCoverage: 0, compilationErrors: undefined };
+        }
 
         if (typeof stderr === "string" && stderr.length > 0) {
             return { compilationErrors: stderr };
@@ -37,8 +46,12 @@ export async function coverageNode(state: typeof State.State): Promise<typeof St
         } else {
             return { compilationErrors: msg };
         }
-        throw err;
     }
+}
+
+function hasNoTestFiles(stdout?: string, stderr?: string): boolean {
+    const out = `${stdout ?? ""}\n${stderr ?? ""}`;
+    return out.includes("[no test files]");
 }
 
 function parseCoverage(coverage: string): number {

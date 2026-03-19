@@ -30,7 +30,6 @@ const { coverageNode } = await import("./coverage.js");
 describe("coverageNode", () => {
   const baseState: typeof State.State = {
     sourceFolder: "/tmp/go-project",
-    messages: [],
     currentCoverage: 0,
     targetCoverage: 80,
     targetModel: "openai",
@@ -99,6 +98,29 @@ describe("coverageNode", () => {
     });
 
     await expect(coverageNode(baseState)).rejects.toThrow("Coverage not found");
+  });
+
+  it("returns 0 coverage when go reports [no test files] on stdout", async () => {
+    execMock.mockImplementation((_cmd: string, _opts: unknown, cb: (err: null, stdout: string, stderr: string) => void) => {
+      cb(null, "?   foo/bar   [no test files]", "");
+      return {} as ChildProcess;
+    });
+
+    const update = await coverageNode(baseState);
+    expect(update).toMatchObject({ currentCoverage: 0, compilationErrors: undefined });
+  });
+
+  it("returns 0 coverage when go reports [no test files] in stderr from exec error", async () => {
+    execMock.mockImplementation((_cmd: string, _opts: unknown, cb: (err: Error & { stdout?: string; stderr?: string }, stdout: string, stderr: string) => void) => {
+      const err = new Error("go test failed") as Error & { stdout?: string; stderr?: string };
+      err.stdout = "?   foo/bar   [no test files]";
+      err.stderr = "";
+      cb(err, err.stdout, err.stderr);
+      return {} as ChildProcess;
+    });
+
+    const update = await coverageNode(baseState);
+    expect(update).toMatchObject({ currentCoverage: 0, compilationErrors: undefined });
   });
 
   it("uses sourceFolder as cwd for go test", async () => {
