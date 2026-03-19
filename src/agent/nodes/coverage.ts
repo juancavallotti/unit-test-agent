@@ -5,6 +5,9 @@
 import { State } from "../state.js";
 import { runExec } from "../../utils/exec.js";
 
+const NO_TEST_FILES_MESSAGE =
+    "No test files found. Create an initial _test.go file for this module and add a basic passing test.";
+
 export async function coverageNode(state: typeof State.State): Promise<typeof State.Update> {
     try {
         const { stdout, stderr } = await runExec(
@@ -13,8 +16,8 @@ export async function coverageNode(state: typeof State.State): Promise<typeof St
         );
 
         if (hasNoTestFiles(stdout, stderr)) {
-            console.log("[coverage] no test files found, defaulting coverage to 0%");
-            return { currentCoverage: 0, compilationErrors: undefined };
+            console.log("[coverage] no test files found, routing to code generation for initial tests");
+            return { currentCoverage: 0, compilationErrors: NO_TEST_FILES_MESSAGE };
         }
 
         if (stderr) {
@@ -35,8 +38,8 @@ export async function coverageNode(state: typeof State.State): Promise<typeof St
         const {stderr, stdout} = err as {stderr?: string, stdout?: string};
 
         if (hasNoTestFiles(stdout, stderr)) {
-            console.log("[coverage] no test files found, defaulting coverage to 0%");
-            return { currentCoverage: 0, compilationErrors: undefined };
+            console.log("[coverage] no test files found, routing to code generation for initial tests");
+            return { currentCoverage: 0, compilationErrors: NO_TEST_FILES_MESSAGE };
         }
 
         if (typeof stderr === "string" && stderr.length > 0) {

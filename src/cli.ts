@@ -13,7 +13,7 @@ export type RunOptions = {
 
 export async function runCommand(opts: RunOptions): Promise<void> {
   const sourceFolder = opts.src ?? process.env.SOURCE_FOLDER;
-  const targetCoverageRaw = opts.coverage ?? process.env.TARGET_COVERAGE;
+  const targetCoverageRaw = opts.coverage ?? process.env.TARGET_COVERAGE ?? "20";
   const targetModelRaw = opts.model ?? process.env.TARGET_MODEL;
   const concurrencyRaw = opts.concurrency ?? process.env.CONCURRENCY ?? "2";
   const recursionLimitRaw =
@@ -21,10 +21,6 @@ export async function runCommand(opts: RunOptions): Promise<void> {
 
   if (!sourceFolder) {
     console.error("Missing source folder. Set --src or SOURCE_FOLDER in .env");
-    process.exit(1);
-  }
-  if (targetCoverageRaw === undefined || targetCoverageRaw === "") {
-    console.error("Missing target coverage. Set --coverage or TARGET_COVERAGE in .env");
     process.exit(1);
   }
   const coverageNum = Number.parseInt(targetCoverageRaw, 10);

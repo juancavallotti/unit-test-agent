@@ -107,7 +107,10 @@ describe("coverageNode", () => {
     });
 
     const update = await coverageNode(baseState);
-    expect(update).toMatchObject({ currentCoverage: 0, compilationErrors: undefined });
+    expect(update).toMatchObject({
+      currentCoverage: 0,
+      compilationErrors: expect.stringContaining("No test files found"),
+    });
   });
 
   it("returns 0 coverage when go reports [no test files] in stderr from exec error", async () => {
@@ -120,7 +123,10 @@ describe("coverageNode", () => {
     });
 
     const update = await coverageNode(baseState);
-    expect(update).toMatchObject({ currentCoverage: 0, compilationErrors: undefined });
+    expect(update).toMatchObject({
+      currentCoverage: 0,
+      compilationErrors: expect.stringContaining("No test files found"),
+    });
   });
 
   it("uses sourceFolder as cwd for go test", async () => {

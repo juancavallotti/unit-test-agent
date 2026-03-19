@@ -122,14 +122,20 @@ describe("cli", () => {
       process.env = origEnv;
     });
 
-    it("exits when target coverage is missing", async () => {
+    it("defaults target coverage to 20 when missing", async () => {
       const origEnv = process.env;
       process.env = { ...origEnv, SOURCE_FOLDER: "/x" };
       delete process.env.TARGET_COVERAGE;
       const { runCommand } = await import("./cli.js");
       const { runGraph } = await import("./agent/graph.js");
-      await expect(runCommand({})).rejects.toThrow("exit");
-      expect(runGraph).not.toHaveBeenCalled();
+      await runCommand({});
+      expect(vi.mocked(runGraph)).toHaveBeenCalledWith(
+        "/x",
+        20,
+        "openai",
+        2,
+        50
+      );
       process.env = origEnv;
     });
 
