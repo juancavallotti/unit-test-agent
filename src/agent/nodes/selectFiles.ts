@@ -1,5 +1,6 @@
 /**
- * The selectFiles node: runs coverage, parses coverage.out, returns top 10 files by uncovered lines then coverage.
+ * The selectFiles node: runs coverage, parses coverage.out, returns top N files by uncovered lines then coverage.
+ * N = state.concurrency (number of files to process in parallel).
  */
 
 import { readFile } from "node:fs/promises";
@@ -21,10 +22,6 @@ const COVERAGE_LINE_RE = /^(.+?):[\d.]+,[\d.]+ (\d+) (\d+)$/;
 
 /** Match `module <path>` in go.mod. */
 const GO_MOD_MODULE_RE = /^module\s+(.+)\s*$/m;
-
-/** The number of files to select. */
-//TODO: make this configurable.
-const TOP_N = 1; //one file for now so we can test.
 
 async function getGoModulePath(sourceFolder: string): Promise<string | null> {
     const goModPath = join(sourceFolder, "go.mod");
@@ -65,8 +62,9 @@ export async function selectFilesNode(state: typeof State.State): Promise<typeof
     //sort the files by uncovered lines then coverage.
     const sorted = sortByUncoveredThenCoverage(files);
 
-    //select the top N files.
-    const selectedFiles = sorted.slice(0, TOP_N);
+    //select up to concurrency files (same as parallel plan/test slots).
+    const n = state.concurrency ?? 2;
+    const selectedFiles = sorted.slice(0, n);
 
     console.log(
         "[selectFiles] selected",

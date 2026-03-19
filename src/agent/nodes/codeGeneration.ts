@@ -10,6 +10,7 @@ import { createCreateFileTool } from "../tools/createFile.js";
 import { createPatchFileTool } from "../tools/patchFile.js";
 import { createReadFileTool } from "../tools/readFile.js";
 import { createRunTestTool } from "../tools/runTest.js";
+import { runWithConcurrency } from "../../utils/runWithConcurrency.js";
 
 const MAX_AGENT_STEPS = 25;
 
@@ -83,66 +84,65 @@ export async function codeGenerationNode(
     }
 
     const systemPrompt = prompt;
+    const concurrency = state.concurrency ?? 2;
 
-    const results = await Promise.all(
-        tasks.map(async (item) => {
-            const { filename, plan } = item;
-            try {
-                const userContent = `Target file: ${filename}\n\nPlan:\n${plan}\n\nImplement the tests according to the plan. Use the tools to read, create, or patch files and to compile.`;
-                let messages: BaseMessage[] = [
-                    new SystemMessage(systemPrompt),
-                    new SystemMessage(skill),
-                    new HumanMessage(userContent),
-                ];
+    const results = await runWithConcurrency(tasks, concurrency, async (item) => {
+        const { filename, plan } = item;
+        try {
+            const userContent = `Target file: ${filename}\n\nPlan:\n${plan}\n\nImplement the tests according to the plan. Use the tools to read, create, or patch files and to compile.`;
+            let messages: BaseMessage[] = [
+                new SystemMessage(systemPrompt),
+                new SystemMessage(skill),
+                new HumanMessage(userContent),
+            ];
 
-                let steps = 0;
-                while (steps < MAX_AGENT_STEPS) {
-                    steps += 1;
-                    const response = await modelWithTools.invoke(messages);
-                    messages = [...messages, response];
+            let steps = 0;
+            while (steps < MAX_AGENT_STEPS) {
+                steps += 1;
+                const response = await modelWithTools.invoke(messages);
+                messages = [...messages, response];
 
-                    const toolCalls = (response as { tool_calls?: Array<{ id?: string; name: string; args: Record<string, unknown> }> })
-                        .tool_calls;
-                    if (!toolCalls?.length) {
-                        break;
-                    }
-
-                    const toolByName = new Map(tools.map((t) => [t.name, t]));
-                    const toolMessages: BaseMessage[] = [];
-                    for (const tc of toolCalls) {
-                        const tool = toolByName.get(tc.name);
-                        const tid = tc.id ?? `call_${steps}_${tc.name}`;
-                        let content: string;
-                        if (tool) {
-                            try {
-                                const out = await tool.invoke(tc.args);
-                                content = typeof out === "string" ? out : JSON.stringify(out);
-                            } catch (e) {
-                                content = `Error: ${e instanceof Error ? e.message : String(e)}`;
-                            }
-                        } else {
-                            content = `Unknown tool: ${tc.name}`;
-                        }
-                        toolMessages.push(
-                            new ToolMessage({ content, tool_call_id: tid })
-                        );
-                    }
-                    messages = [...messages, ...toolMessages];
+                const toolCalls = (response as { tool_calls?: Array<{ id?: string; name: string; args: Record<string, unknown> }> })
+                    .tool_calls;
+                if (!toolCalls?.length) {
+                    break;
                 }
 
-                const finalMessage = extractFinalMessage(messages);
-                return {
-                    filename,
-                    success: true,
-                    message: finalMessage || "Done.",
-                };
-            } catch (err) {
-                const message =
-                    err instanceof Error ? err.message : String(err);
-                return { filename, success: false, message };
+                const toolByName = new Map(tools.map((t) => [t.name, t]));
+                const toolMessages: BaseMessage[] = [];
+                for (const tc of toolCalls) {
+                    const tool = toolByName.get(tc.name);
+                    const tid = tc.id ?? `call_${steps}_${tc.name}`;
+                    let content: string;
+                    if (tool) {
+                        try {
+                            const out = await tool.invoke(tc.args);
+                            content = typeof out === "string" ? out : JSON.stringify(out);
+                        } catch (e) {
+                            content = `Error: ${e instanceof Error ? e.message : String(e)}`;
+                        }
+                    } else {
+                        content = `Unknown tool: ${tc.name}`;
+                    }
+                    toolMessages.push(
+                        new ToolMessage({ content, tool_call_id: tid })
+                    );
+                }
+                messages = [...messages, ...toolMessages];
             }
-        })
-    );
+
+            const finalMessage = extractFinalMessage(messages);
+            return {
+                filename,
+                success: true,
+                message: finalMessage || "Done.",
+            };
+        } catch (err) {
+            const message =
+                err instanceof Error ? err.message : String(err);
+            return { filename, success: false, message };
+        }
+    });
 
     return { codeGenerationResults: results };
 }

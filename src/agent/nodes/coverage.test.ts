@@ -34,6 +34,7 @@ describe("coverageNode", () => {
     currentCoverage: 0,
     targetCoverage: 80,
     targetModel: "openai",
+    concurrency: 2,
     selectedFiles: [],
     plannerResults: [],
     codeGenerationResults: [],

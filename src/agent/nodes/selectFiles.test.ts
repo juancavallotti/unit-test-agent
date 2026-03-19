@@ -48,6 +48,9 @@ describe("selectFilesNode", () => {
     targetModel: "openai",
     selectedFiles: [],
     plannerResults: [],
+    concurrency: 2,
+    codeGenerationResults: [],
+    compilationErrors: undefined,
   } as typeof State.State;
 
   beforeEach(() => {
@@ -102,7 +105,7 @@ describe("selectFilesNode", () => {
     }
   });
 
-  it("returns at most 10 files", async () => {
+  it("returns at most concurrency files", async () => {
     const manyFiles = [
       "mode: set",
       ...Array.from({ length: 15 }, (_, i) => `pkg/file${i}.go:1.0,2.0 1 0`),
@@ -113,7 +116,8 @@ describe("selectFilesNode", () => {
     });
     readFileMock.mockResolvedValue(manyFiles);
 
-    const update = await selectFilesNode(baseState);
+    const stateWithConcurrency = { ...baseState, concurrency: 10 } as typeof State.State;
+    const update = await selectFilesNode(stateWithConcurrency);
 
     expect(update.selectedFiles!.length).toBe(10);
   });

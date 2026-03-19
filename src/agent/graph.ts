@@ -21,13 +21,16 @@ function wrapWithLog(name: string, node: NodeFn): NodeFn {
 export async function runGraph(
     sourceFolder: string,
     targetCoverage: number,
-    targetModel: "ollama" | "openai" = "openai"
+    targetModel: "ollama" | "openai" = "openai",
+    concurrency: number = 2,
+    recursionLimit: number = 50
 ): Promise<typeof State.State> {
     const graph = configureGraph(targetModel);
     const state: typeof State.State = {
         sourceFolder,
         targetCoverage,
         targetModel,
+        concurrency,
         messages: [],
         currentCoverage: 0,
         selectedFiles: [],
@@ -36,7 +39,7 @@ export async function runGraph(
         compilationErrors: undefined,
     } as typeof State.State;
     console.log(`[agent] Starting graph (sourceFolder=${sourceFolder}, targetCoverage=${targetCoverage})`);
-    const result = await graph.invoke(state);
+    const result = await graph.invoke(state, { recursionLimit });
     console.log("[agent] Graph finished.");
     return result;
 }

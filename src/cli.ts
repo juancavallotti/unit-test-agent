@@ -1,6 +1,61 @@
 import "dotenv/config";
 import { program } from "commander";
 import { runGraph } from "./agent/graph.js";
+import { printReport } from "./report.js";
+
+export type RunOptions = {
+  src?: string;
+  coverage?: string;
+  model?: string;
+  concurrency?: string;
+  recursionLimit?: string;
+};
+
+export async function runCommand(opts: RunOptions): Promise<void> {
+  const sourceFolder = opts.src ?? process.env.SOURCE_FOLDER;
+  const targetCoverageRaw = opts.coverage ?? process.env.TARGET_COVERAGE;
+  const targetModelRaw = opts.model ?? process.env.TARGET_MODEL;
+  const concurrencyRaw = opts.concurrency ?? process.env.CONCURRENCY ?? "2";
+  const recursionLimitRaw =
+    opts.recursionLimit ?? process.env.GRAPH_RECURSION_LIMIT ?? "50";
+
+  if (!sourceFolder) {
+    console.error("Missing source folder. Set --src or SOURCE_FOLDER in .env");
+    process.exit(1);
+  }
+  if (targetCoverageRaw === undefined || targetCoverageRaw === "") {
+    console.error("Missing target coverage. Set --coverage or TARGET_COVERAGE in .env");
+    process.exit(1);
+  }
+  const coverageNum = Number.parseInt(targetCoverageRaw, 10);
+  if (Number.isNaN(coverageNum) || coverageNum < 0 || coverageNum > 100) {
+    console.error("Target coverage must be a number between 0 and 100");
+    process.exit(1);
+  }
+
+  const concurrency = Number.parseInt(concurrencyRaw, 10);
+  if (Number.isNaN(concurrency) || concurrency < 1) {
+    console.error("Concurrency must be a positive integer");
+    process.exit(1);
+  }
+
+  const recursionLimit = Number.parseInt(recursionLimitRaw, 10);
+  if (Number.isNaN(recursionLimit) || recursionLimit < 1) {
+    console.error("Recursion limit must be a positive integer");
+    process.exit(1);
+  }
+
+  const model = targetModelRaw === "ollama" ? "ollama" : "openai";
+
+  const result = await runGraph(
+    sourceFolder,
+    coverageNum,
+    model,
+    concurrency,
+    recursionLimit
+  );
+  printReport(result);
+}
 
 program
   .name("unit-test-agent")
@@ -9,30 +64,17 @@ program
 
 program
   .command("run")
-  .description("Run the agent with parameters from .env (SOURCE_FOLDER, TARGET_COVERAGE, TARGET_MODEL)")
-  .action(async () => {
-    const sourceFolder = process.env.SOURCE_FOLDER;
-    const targetCoverage = process.env.TARGET_COVERAGE;
-    const targetModel = process.env.TARGET_MODEL;
-
-    if (!sourceFolder) {
-      console.error("Missing SOURCE_FOLDER in .env");
-      process.exit(1);
-    }
-    if (targetCoverage === undefined || targetCoverage === "") {
-      console.error("Missing TARGET_COVERAGE in .env");
-      process.exit(1);
-    }
-    const coverageNum = Number.parseInt(targetCoverage, 10);
-    if (Number.isNaN(coverageNum) || coverageNum < 0 || coverageNum > 100) {
-      console.error("TARGET_COVERAGE must be a number between 0 and 100");
-      process.exit(1);
-    }
-
-    const model = targetModel === "ollama" ? "ollama" : "openai";
+  .description(
+    "Run the agent. Options override env (SOURCE_FOLDER, TARGET_COVERAGE, TARGET_MODEL, CONCURRENCY, GRAPH_RECURSION_LIMIT)."
+  )
+  .option("-s, --src <path>", "source folder (Go project root)")
+  .option("-c, --coverage <0-100>", "target coverage percentage")
+  .option("-m, --model <ollama|openai>", "model provider (ollama or openai)")
+  .option("--concurrency <number>", "max concurrent plans/tests")
+  .option("--recursion-limit <number>", "graph max recursion limit")
+  .action(async (opts: RunOptions) => {
     try {
-      const result = await runGraph(sourceFolder, coverageNum, model);
-      console.log(result);
+      await runCommand(opts);
     } catch (err) {
       const e = err as Error & { stdout?: string; stderr?: string };
       console.error("Error:", e.message);
