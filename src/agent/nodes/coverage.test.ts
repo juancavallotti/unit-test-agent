@@ -36,6 +36,7 @@ describe("coverageNode", () => {
     targetModel: "openai",
     selectedFiles: [],
     plannerResults: [],
+    codeGenerationResults: [],
   } as typeof State.State;
 
   beforeEach(() => {
