@@ -23,6 +23,9 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/scripts ./scripts
 
+# Disable CGO to reduce environment-specific differences in go test/coverage output.
+ENV CGO_ENABLED=0
+
 # Mounted target repositories should be attached under /workspace.
 WORKDIR /workspace
 
