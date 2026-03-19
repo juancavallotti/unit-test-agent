@@ -7,6 +7,11 @@ const SelectedFileSchema = z.object({
     coverage: z.number(),
 });
 
+const PlannerResultSchema = z.object({
+    filename: z.string(),
+    plan: z.string(),
+});
+
 /**
  * The state of the agent.
  */
@@ -16,4 +21,5 @@ export const State = new StateSchema({
     sourceFolder: z.string(),
     targetCoverage: z.int(),
     selectedFiles: z.array(SelectedFileSchema).default(() => []),
+    plannerResults: z.array(PlannerResultSchema).default(() => []),
 })

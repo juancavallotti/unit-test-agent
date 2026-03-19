@@ -46,6 +46,7 @@ describe("selectFilesNode", () => {
     currentCoverage: 0,
     targetCoverage: 80,
     selectedFiles: [],
+    plannerResults: [],
   } as typeof State.State;
 
   beforeEach(() => {
