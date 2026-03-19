@@ -8,8 +8,8 @@ const PatchFileSchema = z.object({
     path: z
         .string()
         .describe("Path to the file relative to the source directory (graph state sourceFolder)."),
-    start_line: z.number().int().min(1).describe("1-based inclusive start line of the range to replace."),
-    end_line: z.number().int().min(1).describe("1-based inclusive end line of the range to replace."),
+    start_line: z.number().int().min(1).describe("0-based inclusive start line of the range to replace."),
+    end_line: z.number().int().min(1).describe("0-based inclusive end line of the range to replace."),
     new_lines: z.array(z.string()).describe("New lines to insert (replacing the range); each element is one line."),
 });
 
@@ -20,7 +20,7 @@ export function createPatchFileTool(sourceFolder: string): DynamicStructuredTool
     return new DynamicStructuredTool({
         name: "patch_file",
         description:
-            "Replace a range of lines in a file with new lines. Give start_line and end_line (1-based, inclusive) and an array new_lines. You can delete lines (fewer new_lines than range length) or insert extra lines (more new_lines). Returns the new file contents in the same format as read_file (each line prefixed with 'l: <n>'). Paths are relative to the source directory.",
+            "Replace a range of lines in a file with new lines. Give start_line and end_line (1-based, inclusive) and an array new_lines. You can delete lines (fewer new_lines than range length) or insert extra lines (more new_lines). Returns the new file contents in the same format as read_file (each line prefixed with '<n> | '). Paths are relative to the source directory.",
         schema: PatchFileSchema,
         func: async (args) => {
             const { path: filePath, start_line: startLine, end_line: endLine, new_lines: newLines } = args;

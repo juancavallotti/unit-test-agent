@@ -6,5 +6,5 @@
  */
 export function formatContentWithLineNumbers(content: string): string {
     const lines = content.split("\n");
-    return lines.map((line, i) => `l: ${i + 1}\n${line}`).join("\n");
+    return lines.map((line, i) => `${String(i).padStart(4, "0")} | ${line}`).join("\n");
 }

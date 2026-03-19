@@ -12,13 +12,13 @@ const ReadFileSchema = z.object({
 
 /**
  * Structured tool: read a UTF-8 file under the source directory.
- * Output format: for each line, "l: <n>\n<line>" (1-based). Lines joined by newline.
+ * Output format: for each line, "<n> | <line>" (1-based). Lines joined by newline.
  */
 export function createReadFileTool(sourceFolder: string): DynamicStructuredTool {
     return new DynamicStructuredTool({
         name: "read_file",
         description:
-            "Read the full contents of a text file under the project source directory. Output is in line-numbered format: each line is prefixed with 'l: <n>' then a newline then the line content (1-based). Paths are relative to that directory.",
+            "Read the full contents of a text file under the project source directory. Output is in line-numbered format: each line is prefixed with '<n> |' then a newline then the line content (0-based). Paths are relative to that directory.",
         schema: ReadFileSchema,
         func: async (args) => {
             console.log("[tool] read_file called with:", JSON.stringify(args));

@@ -44,14 +44,14 @@ describe("file tools", () => {
         await writeFile(join(dir, "a.txt"), "hello", "utf-8");
         const readTool = createReadFileTool(dir);
         const out = await readTool.invoke({ path: "a.txt" });
-        expect(out).toBe("l: 1\nhello");
+        expect(out).toBe("0000 | hello");
     });
 
     it("read_file returns multi-line content in line-numbered format", async () => {
         await writeFile(join(dir, "multi.txt"), "a\nb\nc", "utf-8");
         const readTool = createReadFileTool(dir);
         const out = await readTool.invoke({ path: "multi.txt" });
-        expect(out).toBe("l: 1\na\nl: 2\nb\nl: 3\nc");
+        expect(out).toBe("0000 | a\n0001 | b\n0002 | c");
     });
 
     it("create_file writes nested path", async () => {
@@ -71,7 +71,7 @@ describe("file tools", () => {
             new_lines: ["b b b"],
         });
         expect(out).toContain("Patched");
-        expect(out).toContain("l: 1\nb b b");
+        expect(out).toContain("0000 | b b b");
         expect(await readFile(join(dir, "c.txt"), "utf-8")).toBe("b b b");
     });
 

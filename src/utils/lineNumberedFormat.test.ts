@@ -3,28 +3,28 @@ import { formatContentWithLineNumbers } from "./lineNumberedFormat.js";
 
 describe("formatContentWithLineNumbers", () => {
     it("formats empty string as single line 1 with no content", () => {
-        expect(formatContentWithLineNumbers("")).toBe("l: 1\n");
+        expect(formatContentWithLineNumbers("")).toBe("0000 | ");
     });
 
     it("formats single line", () => {
-        expect(formatContentWithLineNumbers("hello")).toBe("l: 1\nhello");
+        expect(formatContentWithLineNumbers("hello")).toBe("0000 | hello");
     });
 
     it("formats multiple lines", () => {
         expect(formatContentWithLineNumbers("a\nb\nc")).toBe(
-            "l: 1\na\nl: 2\nb\nl: 3\nc"
+            "0000 | a\n0001 | b\n0002 | c"
         );
     });
 
     it("formats content with empty lines", () => {
         expect(formatContentWithLineNumbers("first\n\nthird")).toBe(
-            "l: 1\nfirst\nl: 2\n\nl: 3\nthird"
+            "0000 | first\n0001 | \n0002 | third"
         );
     });
 
     it("uses 1-based line numbers", () => {
         const out = formatContentWithLineNumbers("x\ny");
-        expect(out).toContain("l: 1\nx");
-        expect(out).toContain("l: 2\ny");
+        expect(out).toContain("0000 | x");
+        expect(out).toContain("0001 | y");
     });
 });
