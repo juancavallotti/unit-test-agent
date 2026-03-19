@@ -22,7 +22,6 @@ const CodeGenerationResultSchema = z.object({
  * The state of the agent.
  */
 export const State = new StateSchema({
-    messages: MessagesValue,
     currentCoverage: z.int(),
     sourceFolder: z.string(),
     targetCoverage: z.int(),

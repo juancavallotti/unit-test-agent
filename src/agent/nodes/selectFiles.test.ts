@@ -42,7 +42,6 @@ github.com/montanaflynn/stats/other.go:1.1,5.2 10 10
 describe("selectFilesNode", () => {
   const baseState: typeof State.State = {
     sourceFolder: "/tmp/go-project",
-    messages: [],
     currentCoverage: 0,
     targetCoverage: 80,
     targetModel: "openai",
