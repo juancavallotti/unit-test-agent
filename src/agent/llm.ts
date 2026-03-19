@@ -3,7 +3,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { ChatOllama } from "@langchain/ollama";
 
 const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-5.4-mini";
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "qwen2.5-coder:14b";
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "qwen3:8b";
 
 const cache = new Map<"ollama" | "openai", BaseChatModel>();
 
@@ -17,7 +17,7 @@ export function getChat(provider: "ollama" | "openai"): BaseChatModel {
         if (provider === "openai") {
             model = new ChatOpenAI({ model: OPENAI_MODEL });
         } else {
-            model = new ChatOllama({ model: OLLAMA_MODEL });
+            model = new ChatOllama({ model: OLLAMA_MODEL, think: true });
         }
         cache.set(provider, model);
     }
