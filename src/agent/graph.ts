@@ -1,6 +1,7 @@
 import { StateGraph, START, END } from "@langchain/langgraph";
 import { State } from "./state.js";
 import { coverageNode } from "./nodes/coverage.js";
+import { selectFilesNode } from "./nodes/selectFiles.js";
 
 export async function runGraph(
     sourceFolder: string,
@@ -23,7 +24,9 @@ export async function runGraph(
 function configureGraph(modelProvider: "ollama" | "openai") {
     return new StateGraph(State)
         .addNode("coverage", coverageNode)
+        .addNode("selectUncoveredFiles", selectFilesNode)
         .addEdge(START, "coverage")
-        .addEdge("coverage", END)
+        .addEdge("coverage", "selectUncoveredFiles")
+        .addEdge("selectUncoveredFiles", END)
         .compile();
 }
