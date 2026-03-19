@@ -12,6 +12,11 @@ import { createRunTestTool } from "../tools/runTest.js";
 
 const MAX_AGENT_STEPS = 25;
 
+/**
+ * Get the tools for the code generation node.
+ * @param sourceFolder 
+ * @returns 
+ */
 function getTools(sourceFolder: string): StructuredToolInterface[] {
     return [
         createReadFileTool(sourceFolder),
@@ -22,6 +27,11 @@ function getTools(sourceFolder: string): StructuredToolInterface[] {
     ];
 }
 
+/**
+ * Extract the final message from the messages.
+ * @param messages 
+ * @returns 
+ */
 function extractFinalMessage(messages: BaseMessage[]): string {
     const last = messages[messages.length - 1];
     if (!last) return "";
@@ -35,6 +45,11 @@ function extractFinalMessage(messages: BaseMessage[]): string {
     return String(content ?? "");
 }
 
+/**
+ * The code generation node.
+ * @param state 
+ * @returns 
+ */
 export async function codeGenerationNode(
     state: typeof State.State
 ): Promise<typeof State.Update> {
