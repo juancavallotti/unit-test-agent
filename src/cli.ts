@@ -29,8 +29,9 @@ program
       process.exit(1);
     }
 
+    const model = targetModel === "ollama" ? "ollama" : "openai";
     try {
-      const result = await runGraph(sourceFolder, coverageNum);
+      const result = await runGraph(sourceFolder, coverageNum, model);
       console.log(result);
     } catch (err) {
       const e = err as Error & { stdout?: string; stderr?: string };

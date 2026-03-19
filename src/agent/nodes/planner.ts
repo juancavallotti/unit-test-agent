@@ -1,5 +1,5 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import { chatOllama } from "../llm.js";
+import { getChat } from "../llm.js";
 import prompt from "../prompts/planner.md";
 import { State } from "../state.js";
 import { createReadFileTool } from "../tools/readFile.js";
@@ -18,6 +18,7 @@ export async function plannerNode(state: typeof State.State): Promise<typeof Sta
     }
 
     const readFile = createReadFileTool(state.sourceFolder);
+    const chat = getChat(state.targetModel ?? "openai");
 
     const results = await Promise.all(
         state.selectedFiles.map(async (selectedFile) => {
@@ -47,7 +48,7 @@ export async function plannerNode(state: typeof State.State): Promise<typeof Sta
                 new SystemMessage(systemContent),
                 new HumanMessage(userContent),
             ];
-            const response = await chatOllama.invoke(messages);
+            const response = await chat.invoke(messages);
             const plan =
                 typeof response.content === "string"
                     ? response.content

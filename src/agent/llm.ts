@@ -1,6 +1,25 @@
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
+import { ChatOpenAI } from "@langchain/openai";
 import { ChatOllama } from "@langchain/ollama";
 
-const MODEL = "qwen2.5-coder:14b";
+const OPENAI_MODEL = "gpt-4o-mini";
+const OLLAMA_MODEL = "qwen2.5-coder:14b";
 
-/** Singleton ChatOllama instance, shared across the agent. */
-export const chatOllama = new ChatOllama({ model: MODEL });
+const cache = new Map<"ollama" | "openai", BaseChatModel>();
+
+/**
+ * Returns the chat model for the given provider. Instances are created on first use
+ * so Ollama is not loaded when using OpenAI only.
+ */
+export function getChat(provider: "ollama" | "openai"): BaseChatModel {
+    let model = cache.get(provider);
+    if (!model) {
+        if (provider === "openai") {
+            model = new ChatOpenAI({ model: OPENAI_MODEL });
+        } else {
+            model = new ChatOllama({ model: OLLAMA_MODEL });
+        }
+        cache.set(provider, model);
+    }
+    return model;
+}

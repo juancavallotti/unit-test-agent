@@ -45,6 +45,7 @@ describe("selectFilesNode", () => {
     messages: [],
     currentCoverage: 0,
     targetCoverage: 80,
+    targetModel: "openai",
     selectedFiles: [],
     plannerResults: [],
   } as typeof State.State;

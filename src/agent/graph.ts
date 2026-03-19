@@ -20,12 +20,13 @@ function wrapWithLog(name: string, node: NodeFn): NodeFn {
 export async function runGraph(
     sourceFolder: string,
     targetCoverage: number,
-    targetModel: "ollama" | "openai" = "ollama"
+    targetModel: "ollama" | "openai" = "openai"
 ): Promise<typeof State.State> {
     const graph = configureGraph(targetModel);
     const state: typeof State.State = {
         sourceFolder,
         targetCoverage,
+        targetModel,
         messages: [],
         currentCoverage: 0,
         selectedFiles: [],

@@ -20,6 +20,7 @@ export const State = new StateSchema({
     currentCoverage: z.int(),
     sourceFolder: z.string(),
     targetCoverage: z.int(),
+    targetModel: z.enum(["ollama", "openai"]).default("openai"),
     selectedFiles: z.array(SelectedFileSchema).default(() => []),
     plannerResults: z.array(PlannerResultSchema).default(() => []),
 })
