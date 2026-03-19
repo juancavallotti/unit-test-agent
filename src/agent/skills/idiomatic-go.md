@@ -11,6 +11,10 @@ func TestFunctionName(t *testing.T) {}
 
 ---
 
+**IMPORTANT**: We are already on the main package's working directory. Please read and create test files 
+using ./ as base path and only go one level deep if you must test inside a subfolder.
+
+
 ## Table-Driven Tests
 
 ```go

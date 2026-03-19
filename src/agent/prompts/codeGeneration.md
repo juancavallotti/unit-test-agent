@@ -6,6 +6,8 @@ Use the provided tools to:
 - Patch existing files with small changes (patch_file).
 - Verify that the Go code compiles (compile_go).
 - Run tests (run_test). Use this to check that tests pass. If they fail, fix the code and run tests again until they pass.
+- Please iterate fixing and running the tests until they pass. 
+- Assume the code is working correctly and if test results indicate wrong results we have to fix the tests.
 
 Only test files are allowed to be created, modified.
 * DO NOT MODIFY IMPLEMENTATION FILES UNDER ANY CIRCUMSTANCE*
