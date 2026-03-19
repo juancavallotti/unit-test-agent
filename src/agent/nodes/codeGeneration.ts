@@ -3,6 +3,7 @@ import type { BaseMessage } from "@langchain/core/messages";
 import type { StructuredToolInterface } from "@langchain/core/tools";
 import { getChat } from "../llm.js";
 import prompt from "../prompts/codeGeneration.md";
+import skill from "../skills/idiomatic-go.md"
 import { State } from "../state.js";
 import { createCompileGoTool } from "../tools/compileGo.js";
 import { createCreateFileTool } from "../tools/createFile.js";
@@ -80,6 +81,7 @@ export async function codeGenerationNode(
                 const userContent = `Target file: ${filename}\n\nPlan:\n${plan}\n\nImplement the tests according to the plan. Use the tools to read, create, or patch files and to compile.`;
                 let messages: BaseMessage[] = [
                     new SystemMessage(systemPrompt),
+                    new SystemMessage(skill),
                     new HumanMessage(userContent),
                 ];
 

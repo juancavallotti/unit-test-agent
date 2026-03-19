@@ -18,7 +18,9 @@ export function createReadFileTool(sourceFolder: string): DynamicStructuredTool 
         description:
             "Read the full contents of a text file under the project source directory. Paths are relative to that directory.",
         schema: ReadFileSchema,
-        func: async ({ path: filePath }) => {
+        func: async (args) => {
+            console.log("[tool] read_file called with:", JSON.stringify(args));
+            const { path: filePath } = args;
             const resolved = resolveUnderSource(sourceFolder, filePath);
             if (!resolved.ok) return resolved.error;
             try {

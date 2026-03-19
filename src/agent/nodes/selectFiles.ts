@@ -68,6 +68,13 @@ export async function selectFilesNode(state: typeof State.State): Promise<typeof
     //select the top N files.
     const selectedFiles = sorted.slice(0, TOP_N);
 
+    console.log(
+        "[selectFiles] selected",
+        selectedFiles.length,
+        "file(s) to implement tests:",
+        selectedFiles.map((f) => `${f.filename} (${f.uncoveredLines} uncovered, ${f.coverage.toFixed(1)}% coverage)`).join(", ")
+    );
+
     //return the selected files.
     return { selectedFiles };
 }

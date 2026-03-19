@@ -15,6 +15,7 @@ export async function coverageNode(state: typeof State.State): Promise<typeof St
         throw new Error(`Coverage command failed: ${stderr}`);
     }
     const coverage = parseCoverage(stdout ?? "");
+    console.log("[coverage] current coverage:", `${coverage}%`);
     return { currentCoverage: coverage };
 }
 

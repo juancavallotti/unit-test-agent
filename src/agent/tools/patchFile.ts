@@ -18,9 +18,15 @@ export function createPatchFileTool(sourceFolder: string): DynamicStructuredTool
     return new DynamicStructuredTool({
         name: "patch_file",
         description:
-            "Replace every occurrence of old_string with new_string in a file under the project source directory. The file is unchanged if old_string is not found. Paths are relative to the source directory.",
+            "Replace every occurrence of old_string with new_string in a file under the project source directory. The file is unchanged if old_string is not found. Returns the new file contents after a successful patch. Paths are relative to the source directory.",
         schema: PatchFileSchema,
-        func: async ({ path: filePath, old_string: oldString, new_string: newString }) => {
+        func: async (args) => {
+            const { path: filePath, old_string: oldString, new_string: newString } = args;
+            console.log("[tool] patch_file called with:", {
+                path: filePath,
+                old_stringLength: oldString?.length ?? 0,
+                new_stringLength: newString?.length ?? 0,
+            });
             if (oldString.length === 0) {
                 return "Error: old_string must not be empty.";
             }
@@ -33,7 +39,7 @@ export function createPatchFileTool(sourceFolder: string): DynamicStructuredTool
                 }
                 const after = before.split(oldString).join(newString);
                 await writeFile(resolved.fullPath, after, "utf-8");
-                return `Patched file: ${filePath}`;
+                return `Patched file: ${filePath}\n\nNew file contents:\n\n${after}`;
             } catch (e) {
                 const msg = e instanceof Error ? e.message : String(e);
                 return `Error patching file: ${msg}`;

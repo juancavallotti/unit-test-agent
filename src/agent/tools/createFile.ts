@@ -20,7 +20,12 @@ export function createCreateFileTool(sourceFolder: string): DynamicStructuredToo
         description:
             "Create or overwrite a file under the project source directory with the given contents. Parent directories are created if needed. Paths are relative to the source directory.",
         schema: CreateFileSchema,
-        func: async ({ path: filePath, contents }) => {
+        func: async (args) => {
+            const { path: filePath, contents } = args;
+            console.log("[tool] create_file called with:", {
+                path: filePath,
+                contentsLength: contents?.length ?? 0,
+            });
             const resolved = resolveUnderSource(sourceFolder, filePath);
             if (!resolved.ok) return resolved.error;
             try {

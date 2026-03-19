@@ -52,6 +52,6 @@ function configureGraph(modelProvider: "ollama" | "openai") {
         .addEdge("coverage", "selectUncoveredFiles")
         .addEdge("selectUncoveredFiles", "planner")
         .addEdge("planner", "codeGeneration")
-        .addEdge("codeGeneration", END)
+        .addEdge("codeGeneration", "coverage")
         .compile();
 }

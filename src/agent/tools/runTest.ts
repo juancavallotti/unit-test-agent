@@ -43,7 +43,9 @@ export function createRunTestTool(sourceFolder: string): DynamicStructuredTool {
         description:
             "Run tests for the Go package containing the given file or directory using `go test -v`. Path is relative to the project source directory. Use -run to run a specific test by name (e.g. 'TestFoo'). Use this to verify tests pass after writing or changing them.",
         schema: RunTestSchema,
-        func: async ({ path: filePath, run: runPattern }) => {
+        func: async (args) => {
+            const { path: filePath, run: runPattern } = args;
+            console.log("[tool] run_test called with:", JSON.stringify(args));
             //resolve the path under the source folder.
             const resolved = resolveUnderSource(sourceFolder, filePath);
             if (!resolved.ok) return resolved.error;

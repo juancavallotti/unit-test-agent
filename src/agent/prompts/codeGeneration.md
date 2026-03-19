@@ -7,4 +7,7 @@ Use the provided tools to:
 - Verify that the Go code compiles (compile_go).
 - Run tests (run_test). Use this to check that tests pass. If they fail, fix the code and run tests again until they pass.
 
+Only test files are allowed to be created, modified.
+* DO NOT MODIFY IMPLEMENTATION FILES UNDER ANY CIRCUMSTANCE*
+
 Follow the plan you are given. Paths are relative to the project source directory. When done, ensure the package compiles and that tests pass (run_test).
