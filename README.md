@@ -14,8 +14,8 @@ I chose this design to keep deterministic paths deterministic and reserve LLM ca
 
 ```mermaid
 flowchart TD
-  cli[CLI run] --> graph[runGraph]
-  graph --> coverage[coverage]
+  cliNode[CLI run] --> runGraphNode[runGraph]
+  runGraphNode --> coverage[coverage]
   coverage -->|"compilationErrors present"| codegen[codeGeneration]
   coverage -->|"currentCoverage >= targetCoverage"| endNode[END]
   coverage -->|"otherwise"| selectFiles[selectUncoveredFiles]
