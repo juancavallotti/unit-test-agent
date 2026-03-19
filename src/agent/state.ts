@@ -6,5 +6,6 @@ import * as z from "zod";
  */
 export const State = new StateSchema({
     messages: MessagesValue,
-    currentCoverage: z.int()
+    currentCoverage: z.int(),
+    sourceFolder: z.string(),
 })
