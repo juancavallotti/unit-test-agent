@@ -7,11 +7,14 @@ import {
     createCreateFileTool,
     createPatchFileTool,
     createReadFileTool,
+    createRunTestTool,
     resolveUnderSource,
 } from "./index.js";
 
 const runExecMock = vi.hoisted(() => vi.fn());
+const execMock = vi.hoisted(() => vi.fn());
 vi.mock("../../utils/exec.js", () => ({ runExec: runExecMock }));
+vi.mock("child_process", () => ({ exec: execMock }));
 
 describe("resolveUnderSource", () => {
     it("resolves paths inside the base", () => {
@@ -143,5 +146,67 @@ describe("compile_go", () => {
         const out = await compileTool.invoke({ path: "../../etc/passwd" });
         expect(out).toBe("Path escapes the source directory.");
         expect(runExecMock).not.toHaveBeenCalled();
+    });
+});
+
+describe("run_test", () => {
+    let dir: string;
+
+    beforeEach(async () => {
+        dir = join(tmpdir(), `uta-run-test-${Date.now()}`);
+        await mkdir(dir, { recursive: true });
+        execMock.mockReset();
+    });
+
+    afterEach(async () => {
+        await rm(dir, { recursive: true, force: true });
+    });
+
+    it("runs go test in package of go file and reports success", async () => {
+        execMock.mockImplementation((_cmd: string, _opts: unknown, cb: (err: null, stdout: string, stderr: string) => void) => {
+            cb(null, "ok\t./pkg\t0.013s", "");
+        });
+        const tool = createRunTestTool(dir);
+        const out = await tool.invoke({ path: "pkg/foo_test.go" });
+        expect(execMock).toHaveBeenCalledWith(
+            "go test -v ./pkg",
+            expect.objectContaining({ cwd: dir, maxBuffer: 4 * 1024 * 1024 }),
+            expect.any(Function)
+        );
+        expect(out).toContain("Tests passed.");
+        expect(out).toContain("ok\t./pkg\t0.013s");
+    });
+
+    it("adds -run argument when provided and trimmed", async () => {
+        execMock.mockImplementation((_cmd: string, _opts: unknown, cb: (err: null, stdout: string, stderr: string) => void) => {
+            cb(null, "ok", "");
+        });
+        const tool = createRunTestTool(dir);
+        await tool.invoke({ path: "pkg", run: "  TestFoo  " });
+        expect(execMock).toHaveBeenCalledWith(
+            "go test -v -run \"TestFoo\" ./pkg",
+            expect.objectContaining({ cwd: dir, maxBuffer: 4 * 1024 * 1024 }),
+            expect.any(Function)
+        );
+    });
+
+    it("returns failure output when tests fail", async () => {
+        execMock.mockImplementation((_cmd: string, _opts: unknown, cb: (err: Error & { code?: number }, stdout: string, stderr: string) => void) => {
+            const err = new Error("failed") as Error & { code?: number };
+            err.code = 1;
+            cb(err, "--- FAIL: TestFoo", "exit status 1");
+        });
+        const tool = createRunTestTool(dir);
+        const out = await tool.invoke({ path: "." });
+        expect(out).toContain("Tests failed:");
+        expect(out).toContain("--- FAIL: TestFoo");
+        expect(out).toContain("exit status 1");
+    });
+
+    it("rejects path escaping source directory", async () => {
+        const tool = createRunTestTool(dir);
+        const out = await tool.invoke({ path: "../../etc/passwd" });
+        expect(out).toBe("Path escapes the source directory.");
+        expect(execMock).not.toHaveBeenCalled();
     });
 });
