@@ -20,6 +20,9 @@ describe("printReport", () => {
       selectedFiles: [],
       codeGenerationResults: [],
       compilationErrors: undefined,
+      targetModel: "ollama",
+      concurrency: 1,
+      plannerResults: [],
     } as Parameters<typeof printReport>[0];
     printReport(state);
     const output = logSpy.mock.calls[0]?.[0] ?? "";
@@ -37,6 +40,9 @@ describe("printReport", () => {
       selectedFiles: [],
       codeGenerationResults: [],
       compilationErrors: undefined,
+      targetModel: "ollama",
+      concurrency: 1,
+      plannerResults: [],
     } as Parameters<typeof printReport>[0];
     printReport(state);
     const output = logSpy.mock.calls[0]?.[0] ?? "";
@@ -51,6 +57,9 @@ describe("printReport", () => {
       selectedFiles: [],
       codeGenerationResults: [],
       compilationErrors: "undefined: Foo",
+      targetModel: "ollama",
+      concurrency: 1,
+      plannerResults: [],
     } as Parameters<typeof printReport>[0];
     printReport(state);
     const output = logSpy.mock.calls[0]?.[0] ?? "";
@@ -68,6 +77,9 @@ describe("printReport", () => {
       ],
       codeGenerationResults: [],
       compilationErrors: undefined,
+      targetModel: "ollama",
+      concurrency: 1,
+      plannerResults: [],
     } as Parameters<typeof printReport>[0];
     printReport(state);
     const output = logSpy.mock.calls[0]?.[0] ?? "";
@@ -88,6 +100,9 @@ describe("printReport", () => {
         { filename: "pkg/bar.go", success: false, message: "Timeout" },
       ],
       compilationErrors: undefined,
+      targetModel: "ollama",
+      concurrency: 1,
+      plannerResults: [],
     } as Parameters<typeof printReport>[0];
     printReport(state);
     const output = logSpy.mock.calls[0]?.[0] ?? "";
