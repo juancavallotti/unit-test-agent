@@ -51,6 +51,7 @@ function extractFinalMessage(messages: BaseMessage[]): string {
 
 /**
  * The code generation node.
+ * This implementsa a ReAct loop so the model can iteratively generate code and verify it, until it's happy with it.
  * @param state 
  * @returns 
  */
