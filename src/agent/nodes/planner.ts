@@ -13,6 +13,12 @@ function getTestPath(sourcePath: string): string {
     return sourcePath.replace(/\.go$/, "_test.go");
 }
 
+/**
+ * The planner inspects the selected files and creates a plan for each file, which is a natural language description of what tests should be created for that file.
+ * This is a separate node because it may be run with a different type of model (reasoning-focused rather than code-generation focused).
+ * @param state current graph state.
+ * @returns updated graph state with planner results.
+ */
 export async function plannerNode(state: typeof State.State): Promise<typeof State.Update> {
     if (state.selectedFiles.length === 0) {
         return { plannerResults: [] };
