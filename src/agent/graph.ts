@@ -27,7 +27,7 @@ export async function runGraph(
     concurrency: number = 2,
     recursionLimit: number = 50
 ): Promise<typeof State.State> {
-    const graph = configureGraph(targetModel);
+    const graph = configureGraph();
     const state: typeof State.State = {
         sourceFolder,
         targetCoverage,
@@ -46,7 +46,7 @@ export async function runGraph(
 }
 
 
-function configureGraph(modelProvider: "ollama" | "openai") {
+function configureGraph() {
     return new StateGraph(State)
         .addNode("coverage", wrapWithLog("coverage", coverageNode))
         .addNode("selectUncoveredFiles", wrapWithLog("selectUncoveredFiles", selectFilesNode))
